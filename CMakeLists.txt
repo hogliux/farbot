@@ -57,7 +57,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
  set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -latomic")
 endif()
 
-add_executable(gtestrunner fifo_test.cpp RealtimeTraits.hpp RealtimeMutatable.hpp RealtimeMutatable.tcc fifo.hpp fifo.tcc ${GTEST_DIR}/src/gtest_main.cc ${GTEST_DIR}/src/gtest-all.cc)
+add_executable(gtestrunner fifo_test.cpp AsyncCaller.hpp RealtimeTraits.hpp RealtimeMutatable.hpp RealtimeMutatable.tcc fifo.hpp fifo.tcc ${GTEST_DIR}/src/gtest_main.cc ${GTEST_DIR}/src/gtest-all.cc)
 target_include_directories(gtestrunner PRIVATE ${GTEST_DIR} ${GTEST_DIR}/include)
 target_link_libraries(gtestrunner Threads::Threads) 
 

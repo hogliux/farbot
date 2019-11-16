@@ -3,8 +3,12 @@
 #include <random>
 #include <unordered_set>
 
+#include <mutex>
+#include <condition_variable>
+
 #include "RealtimeTraits.hpp"
 #include "fifo.hpp"
+#include "AsyncCaller.hpp"
 
 using TestData = std::array<long long, 8>;
 
@@ -214,4 +218,35 @@ TEST (fifo, multi_consumer_single_producer)
 TEST (fifo, multi_consumer_multi_producer)
 {
     do_thread_test<10, 10, farbot::fifo_options::concurrency::multiple, farbot::fifo_options::concurrency::multiple>();
+}
+
+TEST(fifo, async_caller_test)
+{
+    std::mutex init_mutex;
+    std::condition_variable init_cv;
+
+    std::atomic<bool> finish(false);
+    farbot::AsyncCaller<> asyncCaller;
+
+    EXPECT_FALSE (asyncCaller.process());
+
+    std::unique_lock<std::mutex> init_lock (init_mutex);
+
+    std::thread test ([&asyncCaller, &finish, &init_mutex, &init_cv] ()
+    {
+
+        asyncCaller.callAsync ([&finish] () { finish.store (true, std::memory_order_relaxed); } );
+
+        // TODO: this is not quite right as this will cause a synchronisation event and doesn't
+        // fully test if AsyncCaller is no data races
+        {
+            std::unique_lock<std::mutex> l (init_mutex);
+            init_cv.notify_all();
+        }
+    });
+
+    init_cv.wait (init_lock);
+    EXPECT_TRUE (asyncCaller.process());
+    EXPECT_TRUE (finish.load());
+    test.join();
 }
