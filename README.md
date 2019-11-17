@@ -3,7 +3,7 @@ FAbian's Realtime Box o' Tricks
 
 This is a collection of design patterns which can be used in realtime code. This library was introduced to the public at meeting C++ on 16th of November 2019.
 
-This library and the containing design patterns was presented at meeting C++ 2019. You can find the slides here: https://hogliux.github.io/farbot/presentations/meetingcpp_2019/index.html
+This library and the containing design patterns were presented at meeting C++ 2019. You can find the slides here: https://hogliux.github.io/farbot/presentations/meetingcpp_2019/index.html
 
 It contains the following realtime design patterns:
 
