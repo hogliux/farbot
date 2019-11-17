@@ -29,6 +29,7 @@ void changeBiquadParameters (BiquadCoeffecients newCoeffs)
     *coeffs = newCoeffs;
 }
 ```
+where the `true`/`false` template parameter of the `ScopedAccess` class indicates if the thread requiring access to the data is a realtime thread.
 
 RealtimeMutatable
 -----------------
@@ -50,6 +51,7 @@ void updateSpectrumUIButtonClicked() {
     displaySpectrum(*recentSpectrum);
 }
 ```
+where the `true`/`false` template parameter of the `ScopedAccess` class indicates if the thread requiring access to the data is a realtime thread.
 
 fifo
 ----
