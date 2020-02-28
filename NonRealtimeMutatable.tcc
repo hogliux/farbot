@@ -79,6 +79,16 @@ void NonRealtimeMutatable<T>::nonRealtimeRelease()
 }
 
 template <typename T>
+template <typename... Args>
+void NonRealtimeMutatable<T>::nonRealtimeReplace(Args && ... args)
+{
+    nonRealtimeLock.lock();
+    copy.reset (new T (std::forward<Args>(args)...));
+
+    nonRealtimeRelease();
+}
+
+template <typename T>
 NonRealtimeMutatable<T>::NonRealtimeMutatable(std::unique_ptr<T> && u) : storage (std::move (u)), pointer (storage.get()) {}
 
 //==============================================================================

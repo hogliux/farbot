@@ -65,6 +65,12 @@ public:
      */
     void nonRealtimeRelease();
 
+    /** Replace the underlying value with a new instance of T by forwarding
+     *  the method's arguments to T's constructor
+     */
+    template <typename... Args>
+    void nonRealtimeReplace(Args && ... args);
+
     //==============================================================================
     /** Instead of calling acquire and release manually, you can also use this RAII
      *  version which calls acquire automatically on construction and release when
