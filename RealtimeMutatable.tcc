@@ -31,7 +31,7 @@ template <typename T>
 template <typename... Args>
 RealtimeMutatable<T> RealtimeMutatable<T>::create(Args && ... args)
 {
-    return RealtimeObject (false, std::forward(args)...);
+    return RealtimeObject (false, std::forward<Args>(args)...);
 }
 
 template <typename T>

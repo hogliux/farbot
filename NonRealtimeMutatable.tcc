@@ -34,7 +34,7 @@ template <typename T>
 template <typename... Args>
 NonRealtimeMutatable<T> NonRealtimeMutatable<T>::create(Args && ... args)
 {
-    return RealtimeObject (std::make_unique<T> (std::forward(args)...));
+    return RealtimeObject (std::make_unique<T> (std::forward<Args>(args)...));
 }
 
 template <typename T>
