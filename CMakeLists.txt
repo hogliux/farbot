@@ -57,8 +57,10 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
  set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -latomic")
 endif()
 
-add_executable(gtestrunner fifo_test.cpp AsyncCaller.hpp RealtimeTraits.hpp RealtimeObject.hpp RealtimeObject.tcc fifo.hpp fifo.tcc ${GTEST_DIR}/src/gtest_main.cc ${GTEST_DIR}/src/gtest-all.cc)
-target_include_directories(gtestrunner PRIVATE ${GTEST_DIR} ${GTEST_DIR}/include)
+add_executable(gtestrunner test/test.cpp include/farbot/AsyncCaller.hpp include/farbot/RealtimeTraits.hpp include/farbot/RealtimeObject.hpp include/farbot/detail/RealtimeObject.tcc include/farbot/fifo.hpp include/farbot/detail/fifo.tcc ${GTEST_DIR}/src/gtest_main.cc ${GTEST_DIR}/src/gtest-all.cc)
+target_include_directories(gtestrunner PRIVATE include ${GTEST_DIR} ${GTEST_DIR}/include)
 target_link_libraries(gtestrunner Threads::Threads) 
 
 gtest_discover_tests(gtestrunner TEST_PREFIX farbot:)
+
+install(DIRECTORY src/lib/include/roc DESTINATION ${CMAKE_INSTALL_PREFIX}/include)

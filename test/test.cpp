@@ -6,11 +6,10 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "RealtimeTraits.hpp"
-#include "fifo.hpp"
-#include "AsyncCaller.hpp"
-
-#include "RealtimeObject.hpp"
+#include "farbot/RealtimeTraits.hpp"
+#include "farbot/fifo.hpp"
+#include "farbot/AsyncCaller.hpp"
+#include "farbot/RealtimeObject.hpp"
 
 using TestData = std::array<long long, 8>;
 

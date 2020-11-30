@@ -1,6 +1,5 @@
 #pragma once
 
-#include "RealtimeObject.hpp"
 #include <cassert>
 
 namespace farbot
