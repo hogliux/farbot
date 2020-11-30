@@ -61,6 +61,6 @@ add_executable(gtestrunner test/test.cpp include/farbot/AsyncCaller.hpp include/
 target_include_directories(gtestrunner PRIVATE include ${GTEST_DIR} ${GTEST_DIR}/include)
 target_link_libraries(gtestrunner Threads::Threads) 
 
-gtest_discover_tests(gtestrunner TEST_PREFIX farbot:)
+gtest_add_tests(TARGET gtestrunner SOURCES test/test.cpp)
 
-install(DIRECTORY src/lib/include/roc DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+install(DIRECTORY include/farbot DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
