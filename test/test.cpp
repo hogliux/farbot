@@ -83,7 +83,9 @@ TEST (fifo, random_push_pop)
             read_available += consec_writes;
 
             if (write_available == 0)
+            {
                 EXPECT_FALSE (fifo.push (create(writeidx + 1)));
+            }
         }
 
         if (read_available > 0)
@@ -153,7 +155,9 @@ void do_thread_test()
                     EXPECT_TRUE (values.emplace (value).second);
 
                     if (number_of_writer_threads == 1)
+                    {
                         EXPECT_GT (value, lastValue);
+                    }
                     
                     lastValue = value;
                 }
