@@ -3,6 +3,8 @@
 #include "RealtimeMutatable.hpp"
 #include <cassert>
 
+
+
 namespace farbot
 {
 template <typename T>
@@ -45,6 +47,15 @@ void RealtimeMutatable<T>::realtimeRelease() noexcept
 {
     auto idx = control.fetch_or (BUSY_BIT, std::memory_order_acquire) & INDEX_BIT;
     data[idx] = realtimeCopy;
+    control.store ((idx & INDEX_BIT) | NEWDATA_BIT, std::memory_order_release);
+}
+
+template <typename T>
+template <typename... Args>
+void RealtimeMutatable<T>::realtimeReplace(Args && ... args)
+{
+    auto idx = control.fetch_or (BUSY_BIT, std::memory_order_acquire) & INDEX_BIT;
+    data[idx] = T(std::forward<Args>(args)...);
     control.store ((idx & INDEX_BIT) | NEWDATA_BIT, std::memory_order_release);
 }
 
