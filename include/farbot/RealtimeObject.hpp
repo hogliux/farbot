@@ -67,8 +67,8 @@ public:
     /** Replace the underlying value with a new instance of T by forwarding
      *  the method's arguments to T's constructor
      */
-    template <typename... Args>
-    std::enable_if_t<Options == RealtimeObjectOptions::realtimeMutatable, std::void_t<Args...>>
+    template <RealtimeObjectOptions O = Options, typename... Args>
+    std::enable_if_t<O == RealtimeObjectOptions::realtimeMutatable, std::void_t<Args...>>
     realtimeReplace(Args && ... args) noexcept               { mImpl.realtimeReplace(std::forward<Args>(args)...); }
 
     //==============================================================================
@@ -92,8 +92,8 @@ public:
     /** Replace the underlying value with a new instance of T by forwarding
      *  the method's arguments to T's constructor
      */
-    template <typename... Args>
-    std::enable_if_t<Options == RealtimeObjectOptions::nonRealtimeMutatable, std::void_t<Args...>>
+    template <RealtimeObjectOptions O = Options, typename... Args>
+    std::enable_if_t<O == RealtimeObjectOptions::nonRealtimeMutatable, std::void_t<Args...>>
     nonRealtimeReplace(Args && ... args)                     { mImpl.nonRealtimeReplace(std::forward<Args>(args)...); }
 
     //==============================================================================
