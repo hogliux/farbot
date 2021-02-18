@@ -281,23 +281,23 @@ class RMScopedAccessImpl
 protected:
     RMScopedAccessImpl (RealtimeMutatable<T>& parent)
         : p (parent),
-          idx(p.acquireIndex())
+          currentValue(&p.realtimeAcquire())
     {}
 
     ~RMScopedAccessImpl() 
     {
-        p.releaseIndex(idx);
+        p.realtimeRelease();
     }
 public:
-    T* get() noexcept                       { return &p.data[idx];  }
-    const T* get() const noexcept           { return &p.data[idx];  }
-    T &operator *() noexcept                { return p.data[idx]; }
-    const T &operator *() const noexcept    { return p.data[idx]; }
-    T* operator->() noexcept                { return &p.data[idx]; }
-    const T* operator->() const noexcept    { return &p.data[idx]; }
+    T* get() noexcept                       { return currentValue;  }
+    const T* get() const noexcept           { return currentValue;  }
+    T &operator *() noexcept                { return *currentValue; }
+    const T &operator *() const noexcept    { return *currentValue; }
+    T* operator->() noexcept                { return currentValue; }
+    const T* operator->() const noexcept    { return currentValue; }
 private:
     RealtimeMutatable<T>& p;
-    int idx;
+    T* currentValue;
 };
 
 template <typename T>

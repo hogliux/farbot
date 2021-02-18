@@ -306,3 +306,46 @@ TEST(NonRealtimeMutatable, tester)
 
     realtime.realtimeReplace(1.0, 1.2, 3.4, 5.4, 5.4);
 }
+
+TEST(RealtimeMutatable, valueIsPreserved)
+{
+    using RealtimeHistogram = farbot::RealtimeObject<std::array<int, 256>, farbot::RealtimeObjectOptions::realtimeMutatable>;
+    RealtimeHistogram histogram(std::array<int, 256>{});
+
+    {
+        RealtimeHistogram::ScopedAccess<farbot::ThreadType::realtime> hist(histogram);
+
+        std::fill(hist->begin(), hist->end(), 0);
+    }
+
+    for (int i = 0; i < 100; ++i)
+    {
+        RealtimeHistogram::ScopedAccess<farbot::ThreadType::realtime> hist(histogram);
+
+        ASSERT_EQ((*hist)[0], i);
+
+        (*hist)[0]++;
+    }
+
+    {
+        RealtimeHistogram::ScopedAccess<farbot::ThreadType::realtime> hist(histogram);
+
+        std::fill(hist->begin(), hist->end(), 0);
+    }
+
+    for (int i = 0; i < 100; ++i)
+    {
+        {
+            RealtimeHistogram::ScopedAccess<farbot::ThreadType::realtime> hist(histogram);
+
+            ASSERT_EQ((*hist)[0], i);
+
+            (*hist)[0]++;
+        }
+
+        {
+            RealtimeHistogram::ScopedAccess<farbot::ThreadType::nonRealtime> hist(histogram);
+            ASSERT_EQ((*hist)[0], (i + 1));
+        }
+    }
+}
