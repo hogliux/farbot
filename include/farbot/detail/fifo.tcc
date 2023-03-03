@@ -174,7 +174,7 @@ template <typename T, bool consumer_concurrency, bool producer_concurrency,
 class fifo_impl
 {
 public:
-    fifo_impl (int capacity) : slots (capacity) 
+    fifo_impl (int capacity) : slots (static_cast<std::size_t>(capacity)) 
     {
         assert ((capacity & (capacity - 1)) == 0);
     }
