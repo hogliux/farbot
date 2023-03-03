@@ -27,7 +27,7 @@ enum class full_empty_failure_mode
 };
 }
 
-// single consumer, single producer
+// multiple consumer, multiple producer
 template <typename T,
           fifo_options::concurrency consumer_concurrency = fifo_options::concurrency::multiple,
           fifo_options::concurrency producer_concurrency = fifo_options::concurrency::multiple,
