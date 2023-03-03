@@ -7,6 +7,7 @@ This library and the containing design patterns were presented at meeting C++ 20
 
 It contains the following realtime design patterns:
 
+
 RealtimeObject
 --------------
 
@@ -14,7 +15,7 @@ RealtimeObject
 
 You can use it liked this:
 
-```
+```cpp
 struct BiquadCoeffecients  {  float b0, b1, b2, a1, a2; };
 RealtimeObject<BiquadCoeffecients, RealtimeObjectOptions::nonRealtimeMutatable> biquadCoeffs;
 
@@ -36,7 +37,8 @@ where the `ThreadType::Realtime`/`ThreadType::nonRealtime` template parameter of
 
 Here is an example where only the **realtime** thread can mutate the data:
 
-```
+
+```cpp
 using FrequencySpectrum = std::array<float, 512>;
 RealtimeObject<FrequencySpectrum, RealtimeObjectOptions::realtimeMutatable> mostRecentSpectrum;
 
@@ -64,10 +66,10 @@ The `fifo` will never lock nor block. Additionally, depending on the above optio
 
 Usage:
 
-```
+```cpp
 fifo<std::function<void()>*,
                   fifo_options::concurrency::single,
-                  fifo_options::concurrency::multiple, 
+                  fifo_options::concurrency::multiple,
                   fifo_options::full_empty_failure_mode::return_false_on_full_or_empty,
                   fifo_options::full_empty_failure_mode::overwrite_or_return_default> my_fifo; // <- this fifo is wait-free on push and pop
 
@@ -82,7 +84,7 @@ AsyncCaller is a class which contains a method called `callAsync` with which a l
 
 Realtime traits
 ---------------
-The farbot library also contains very limited type traits to check if a specefic type is realtime moveable/copyable. Currently this only works for trivially movable/copyable and a few STL containers.
+The farbot library also contains very limited type traits to check if a specific type is realtime movable/copyable. Currently this only works for trivially movable/copyable and a few STL containers.
 
 `farbot::is_realtime_copy_assignable`, `farbot::is_realtime_copy_constructable`
 `farbot::is_realtime_move_assignable`, `farbot::is_realtime_move_constructable`
