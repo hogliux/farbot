@@ -1,14 +1,16 @@
 #include <gtest/gtest.h>
 #include <atomic>
 #include <random>
+#include <array>
 #include <unordered_set>
 
 #include <mutex>
 #include <condition_variable>
 
-#include "RealtimeTraits.hpp"
-#include "fifo.hpp"
-#include "AsyncCaller.hpp"
+#include "farbot/RealtimeTraits.hpp"
+#include "farbot/fifo.hpp"
+#include "farbot/AsyncCaller.hpp"
+#include "farbot/RealtimeObject.hpp"
 
 using TestData = std::array<long long, 8>;
 
@@ -82,7 +84,9 @@ TEST (fifo, random_push_pop)
             read_available += consec_writes;
 
             if (write_available == 0)
+            {
                 EXPECT_FALSE (fifo.push (create(writeidx + 1)));
+            }
         }
 
         if (read_available > 0)
@@ -152,7 +156,9 @@ void do_thread_test()
                     EXPECT_TRUE (values.emplace (value).second);
 
                     if (number_of_writer_threads == 1)
+                    {
                         EXPECT_GT (value, lastValue);
+                    }
                     
                     lastValue = value;
                 }
@@ -249,4 +255,97 @@ TEST(fifo, async_caller_test)
     EXPECT_TRUE (asyncCaller.process());
     EXPECT_TRUE (finish.load());
     test.join();
+}
+
+TEST(RealtimeMutatable, tester)
+{
+    struct BiquadCoeffecients { 
+        BiquadCoeffecients() = default;
+        BiquadCoeffecients(float _a1, float _a2, float _b1, float _b2, float _b3) : a1(_a1), a2(_a2), b1(_b1), b2(_b2), b3(_b3) {}
+        float a1, a2, b1, b2, b3; } biquads;
+    using RealtimeBiquads = farbot::RealtimeObject<BiquadCoeffecients, farbot::RealtimeObjectOptions::nonRealtimeMutatable>;
+    RealtimeBiquads realtime(biquads);
+
+    {
+        RealtimeBiquads::ScopedAccess<farbot::ThreadType::nonRealtime> scopedAccess(realtime);
+
+        scopedAccess->a1 = 1.0;
+        scopedAccess->a2 = 1.4;
+    }
+
+    {
+        RealtimeBiquads::ScopedAccess<farbot::ThreadType::realtime> scopedAccess(realtime);
+
+        std::cout << scopedAccess->a1 << std::endl;
+    }
+
+    realtime.nonRealtimeReplace(1.0, 1.2, 3.4, 5.4, 5.4);
+}
+
+TEST(NonRealtimeMutatable, tester)
+{
+    struct BiquadCoeffecients { 
+        BiquadCoeffecients() = default;
+        BiquadCoeffecients(float _a1, float _a2, float _b1, float _b2, float _b3) : a1(_a1), a2(_a2), b1(_b1), b2(_b2), b3(_b3) {}
+        float a1, a2, b1, b2, b3; } biquads;
+    using RealtimeBiquads = farbot::RealtimeObject<BiquadCoeffecients, farbot::RealtimeObjectOptions::realtimeMutatable>;
+    RealtimeBiquads realtime(biquads);
+
+    {
+        RealtimeBiquads::ScopedAccess<farbot::ThreadType::realtime> scopedAccess(realtime);
+
+        scopedAccess->a1 = 1.0;
+        scopedAccess->a2 = 1.4;
+    }
+
+    {
+        RealtimeBiquads::ScopedAccess<farbot::ThreadType::nonRealtime> scopedAccess(realtime);
+
+        std::cout << scopedAccess->a1 << std::endl;
+    }
+
+    realtime.realtimeReplace(1.0, 1.2, 3.4, 5.4, 5.4);
+}
+
+TEST(RealtimeMutatable, valueIsPreserved)
+{
+    using RealtimeHistogram = farbot::RealtimeObject<std::array<int, 256>, farbot::RealtimeObjectOptions::realtimeMutatable>;
+    RealtimeHistogram histogram(std::array<int, 256>{});
+
+    {
+        RealtimeHistogram::ScopedAccess<farbot::ThreadType::realtime> hist(histogram);
+
+        std::fill(hist->begin(), hist->end(), 0);
+    }
+
+    for (int i = 0; i < 100; ++i)
+    {
+        RealtimeHistogram::ScopedAccess<farbot::ThreadType::realtime> hist(histogram);
+
+        ASSERT_EQ((*hist)[0], i);
+
+        (*hist)[0]++;
+    }
+
+    {
+        RealtimeHistogram::ScopedAccess<farbot::ThreadType::realtime> hist(histogram);
+
+        std::fill(hist->begin(), hist->end(), 0);
+    }
+
+    for (int i = 0; i < 100; ++i)
+    {
+        {
+            RealtimeHistogram::ScopedAccess<farbot::ThreadType::realtime> hist(histogram);
+
+            ASSERT_EQ((*hist)[0], i);
+
+            (*hist)[0]++;
+        }
+
+        {
+            RealtimeHistogram::ScopedAccess<farbot::ThreadType::nonRealtime> hist(histogram);
+            ASSERT_EQ((*hist)[0], (i + 1));
+        }
+    }
 }

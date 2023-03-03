@@ -7,60 +7,62 @@ This library and the containing design patterns were presented at meeting C++ 20
 
 It contains the following realtime design patterns:
 
-NonRealtimeMutatable
---------------------
-`NonRealtimeMutatable<T>` is a templated class with which you can share data of type T between non-realtime threads and a single realtime thread. Only the **non-realtime** threads may mutate the data. You can use it like this:
+
+RealtimeObject
+--------------
+
+`RealtimeObject<T, RealtimeObjectOptions>` is a templated class with which you can share data of type T between non-realtime threads and a single realtime thread. Depending on the non-type template parameter option `RealtimeObjectOptions` either only the **realtime** or the **non-realtime** thread may mutate the data.
+
+You can use it liked this:
 
 ```cpp
 struct BiquadCoeffecients  {  float b0, b1, b2, a1, a2; };
-NonRealtimeMutatable<BiquadCoeffecients> biquadCoeffs;
+RealtimeObject<BiquadCoeffecients, RealtimeObjectOptions::nonRealtimeMutatable> biquadCoeffs;
 
 /* called on realtime thread */
 void processAudio (float* buffer)
 {
-    NonRealtimeMutatable<BiquadCoeffecients>::ScopedAccess<true> coeffs(biquadCoeffs);
+    RealtimeObject<BiquadCoeffecients, RealtimeObjectOptions::nonRealtimeMutatable>::ScopedAccess<ThreadType::realtime> coeffs(biquadCoeffs);
     processBiquad (*coeffs, buffer);
 }
 
 /* called on non-realtime thread */
 void changeBiquadParameters (BiquadCoeffecients newCoeffs)
 {
-    NonRealtimeMutatable<BiquadCoeffecients>::ScopedAccess<false> coeffs(biquadCoeffs);
+    RealtimeObject<BiquadCoeffecients, RealtimeObjectOptions::nonRealtimeMutatable>::ScopedAccess<ThreadType::nonRealtime> coeffs(biquadCoeffs);
     *coeffs = newCoeffs;
 }
 ```
-where the `true`/`false` template parameter of the `ScopedAccess` class indicates if the thread requiring access to the data is a realtime thread.
+where the `ThreadType::Realtime`/`ThreadType::nonRealtime` template parameter of the `ScopedAccess` class indicates if the thread requiring access to the data is a realtime thread or not.
 
-RealtimeMutatable
------------------
-`RealtimeMutatable<T>` is a templated class with which you can share data of type T between non-realtime threads and a single realtime thread. Opposed to `NonRealtimeMutatable`, only the **realtime** threads may mutate the data. You can use it like this:
+Here is an example where only the **realtime** thread can mutate the data:
+
 
 ```cpp
 using FrequencySpectrum = std::array<float, 512>;
-RealtimeMutatable<FrequencySpectrum> mostRecentSpectrum;
+RealtimeObject<FrequencySpectrum, RealtimeObjectOptions::realtimeMutatable> mostRecentSpectrum;
 
 /* called on realtime thread */
 void processAudio (const float* buffer, size_t n) {
-    RealtimeMutatable<FrequencySpectrum>::ScopedAccess<true> freqSpec(mostRecentSpectrum);
+    RealtimeObject<FrequencySpectrum, RealtimeObjectOptions::realtimeMutatable>::ScopedAccess<ThreadType::realtime> freqSpec(mostRecentSpectrum);
     *freqSpec = calculateSpectrum (buffer, n);
 }
 
 /* called on non-realtime thread */
 void updateSpectrumUIButtonClicked() {
-    RealtimeMutatable<FrequencySpectrum>::ScopedAccess<false> recentSpectrum(mostRecentSpectrum);
+    RealtimeObject<FrequencySpectrum, RealtimeObjectOptions::realtimeMutatable>::ScopedAccess<ThreadType::nonRealtime> recentSpectrum(mostRecentSpectrum);
     displaySpectrum(*recentSpectrum);
 }
 ```
-where the `true`/`false` template parameter of the `ScopedAccess` class indicates if the thread requiring access to the data is a realtime thread.
 
 fifo
 ----
 
 `fifo` is a versatile realtime-safe ringbuffer class which supports various types of fifos: you can choose the consumer/producer to either be accessed from a single or multiple thread. This need not be the same for the consumer and producer, for example, you could have a multi-producer, single-consumer fifo. This is controlled by the `farbot::fifo_options::concurrency::single`/`farbot::fifo_options::concurrency::multiple` template parameter.
 
-In addition, you can also choose what happens on an underrun (during a pop) or an overrun (during a push). A fifo with `farbot::fifo_options::full_empty_failure_mode::return_false_on_full_or_empty` will return `false` on a push/pop if the fifo is full/empty respectively. A fifo with `farbot::fifo_options::full_empty_failure_mode::overwrite_or_return_default` will overwrite on full (pop) or return a default constructed element on empty (pop). Again, this option can be choses independently for the consumer or producer. Note, that with the `farbot::fifo_options::full_empty_failure_mode::overwrite_or_return_default` option the **ordering of the FIFO is lost** when overrunning or underruning, i.e. newer elements may be returned before older elements in this case.
+In addition, you can also choose what happens on an underrun (during a pop) or an overrun (during a push). A fifo with `farbot::fifo_options::full_empty_failure_mode::return_false_on_full_or_empty` will return `false` on a push/pop if the fifo is full/empty respectively. A fifo with `farbot::fifo_options::full_empty_failure_mode::overwrite_or_return_default` will overwrite on full (pop) or return a default constructed element on empty (pop). Again, this option can be chosen independently for the consumer or producer. Note, that with the `farbot::fifo_options::full_empty_failure_mode::overwrite_or_return_default` option the **ordering of the FIFO is lost** when overrunning or underruning, i.e. newer elements may be returned before older elements in this case.
 
-Depending on the above options the push/pop operation may be wait-free: if the consumer/producer is accessed from only a single thread *or* the consumer/producer uses `overwrite_or_return_default` then the pop/push will be wait-free respectively. Otherwise the particular (i.e. push or pop) operation will not be wait-free.
+The `fifo` will never lock nor block. Additionally, depending on the above options the push/pop operation may be wait-free: if the consumer/producer is accessed from only a single thread *or* the consumer/producer uses `overwrite_or_return_default` then the pop/push will be wait-free respectively. Otherwise the perticular (i.e. push or pop) operation will not be wait-free.
 
 Usage:
 

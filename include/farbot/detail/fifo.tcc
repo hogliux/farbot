@@ -1,5 +1,4 @@
 #pragma once
-#include "fifo.hpp"
 
 namespace farbot
 {
