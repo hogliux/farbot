@@ -1,0 +1,23 @@
+{
+    "name": "farbot",
+    "build": {
+         "dockerfile": "Dockerfile"
+    },
+    "runArgs" : ["--rm", 
+      "--network=host"
+    ],
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/build-user/farbot,type=bind,consistency=delegated",
+    "workspaceFolder": "/home/build-user/farbot",
+    "settings": { 
+       "terminal.integrated.shell.linux": "/bin/zsh",
+       "terminal.integrated.detectLocale": "off"
+    },
+    "extensions": [
+       "eamodio.gitlens",
+       "ms-vscode.cpptools",
+       "twxs.cmake",
+       "ms-vscode.cmake-tools",
+       "xaver.clang-format",
+       "sonarsource.sonarlint-vscode"
+    ]
+ }
