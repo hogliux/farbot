@@ -57,10 +57,32 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
  set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -latomic")
 endif()
 
+set(TARGET_NAME ${PROJECT_NAME})
+add_library(${TARGET_NAME} INTERFACE)
+target_include_directories(${TARGET_NAME} INTERFACE 
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+add_library(${PROJECT_NAME}::${TARGET_NAME} ALIAS ${TARGET_NAME})
+
+option(BUILD_TESTS "Build tests" ON)
+if(BUILD_TESTS)
 add_executable(gtestrunner test/test.cpp include/farbot/AsyncCaller.hpp include/farbot/RealtimeTraits.hpp include/farbot/RealtimeObject.hpp include/farbot/detail/RealtimeObject.tcc include/farbot/fifo.hpp include/farbot/detail/fifo.tcc ${GTEST_DIR}/src/gtest_main.cc ${GTEST_DIR}/src/gtest-all.cc)
 target_include_directories(gtestrunner PRIVATE include ${GTEST_DIR} ${GTEST_DIR}/include)
 target_link_libraries(gtestrunner Threads::Threads) 
 
 gtest_add_tests(TARGET gtestrunner SOURCES test/test.cpp)
+endif()
 
-install(DIRECTORY include/farbot DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+include(GNUInstallDirs)
+install(TARGETS ${TARGET_NAME}
+   EXPORT ${PROJECT_NAME}-targets
+)
+install(EXPORT ${PROJECT_NAME}-targets
+   NAMESPACE ${PROJECT_NAME}::
+   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+install(DIRECTORY include/farbot DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

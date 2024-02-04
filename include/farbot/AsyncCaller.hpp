@@ -13,7 +13,8 @@ namespace farbot
  * 
  *  The non-realtime thread must call process() to process the lambdas.
  */
-template <fifo_options::concurrency caller_concurrency = fifo_options::concurrency::multiple>
+template <fifo_options::concurrency caller_concurrency = fifo_options::concurrency::multiple,
+          typename function_type = std::function<void()> >
 class AsyncCaller
 {
 public:
@@ -31,7 +32,7 @@ public:
      * 
      * Return false if there was not enough room in the underlying fifo.
      */
-    bool callAsync (std::function<void()> && lambda)
+    bool callAsync (function_type && lambda)
     {
         return ringbuffer.push (std::move (lambda));
     }
@@ -49,7 +50,7 @@ public:
     bool process()
     {
         auto didProcess = false;
-        std::function<void()> lambda;
+        function_type lambda;
 
         while (ringbuffer.pop (lambda))
         {
@@ -62,6 +63,6 @@ public:
         return didProcess;
     }
 private:
-    fifo<std::function<void()>, fifo_options::concurrency::single, caller_concurrency> ringbuffer;
+    fifo<function_type, fifo_options::concurrency::single, caller_concurrency> ringbuffer;
 };
 }
