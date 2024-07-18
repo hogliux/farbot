@@ -7,7 +7,7 @@ find_package(Threads REQUIRED)
 # Enable testing
 include(GoogleTest)
 enable_testing()
-set(GTEST_DIR "${CMAKE_SOURCE_DIR}/googletest/googletest")
+set(GTEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/googletest/googletest")
 
 # Set a default build type if none was specified
 set(default_build_type "Release")
@@ -35,7 +35,7 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
     set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG}")
   endif()
-elseif(CMAKE_BUILD_TYPE MATCHES "Release")
+elseif(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "MinSizeRel" OR CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
   set(SANITIZERS_ENABLED 0)
   add_definitions("-DNDEBUG=1")
 else()
