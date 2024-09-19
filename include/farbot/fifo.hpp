@@ -19,7 +19,7 @@ enum class concurrency
 enum class full_empty_failure_mode
 {
     // Setting this as producer option causes the fifo to overwrite on a push when the fifo is full
-    // Setting this a s consumer option causes the fifo to return a default constructed value on pop when the fifo is empty
+    // Setting this as consumer option causes the fifo to return a default constructed value on pop when the fifo is empty
     overwrite_or_return_default,
 
     // Return false on push/pop if the fifo is full/empty respectively
