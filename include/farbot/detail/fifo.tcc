@@ -31,7 +31,7 @@ struct multi_position_info
                 return it->pos;
 
         auto pos = num_threads.fetch_add (1, std::memory_order_relaxed);
-        
+
         if (pos >= MAX_THREADS)
         {
             assert (false);
@@ -174,24 +174,24 @@ template <typename T, bool consumer_concurrency, bool producer_concurrency,
 class fifo_impl
 {
 public:
-    fifo_impl (int capacity) : slots (static_cast<std::size_t>(capacity)) 
+    fifo_impl (int capacity) : _slots (static_cast<std::size_t>(capacity))
     {
         assert ((capacity & (capacity - 1)) == 0);
     }
 
     bool push(T&& result)
     {
-        return writer.push_or_pop (slots, std::move (result), reader.getpos() + static_cast<std::uint32_t> (slots.size()));
+        return writer.push_or_pop (_slots, std::move (result), reader.getpos() + static_cast<std::uint32_t> (_slots.size()));
     }
 
     bool pop(T& result)
     {
-        return reader.push_or_pop (slots, std::move (result), writer.getpos());
+        return reader.push_or_pop (_slots, std::move (result), writer.getpos());
     }
 
 private:
     //==============================================================================
-    std::vector<T> slots = {};
+    std::vector<T> _slots = {};
 
     read_or_writer<T, false, consumer_concurrency, consumer_failure_mode, MAX_THREADS> reader;
     read_or_writer<T, true, producer_concurrency, producer_failure_mode, MAX_THREADS> writer;
@@ -203,7 +203,7 @@ template <typename T,
           fifo_options::concurrency producer_concurrency,
           fifo_options::full_empty_failure_mode consumer_failure_mode,
           fifo_options::full_empty_failure_mode producer_failure_mode,
-          std::size_t MAX_THREADS> 
+          std::size_t MAX_THREADS>
 fifo<T, consumer_concurrency, producer_concurrency, consumer_failure_mode, producer_failure_mode, MAX_THREADS>::fifo (int capacity) : impl (capacity) {}
 
 template <typename T,
