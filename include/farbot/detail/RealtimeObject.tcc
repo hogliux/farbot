@@ -183,7 +183,7 @@ public:
 
     void realtimeRelease() noexcept
     {
-        auto idx = acquireIndex();
+        size_t idx = acquireIndex();
         data[idx] = realtimeCopy;
         releaseIndex(idx);
     }
@@ -201,12 +201,12 @@ public:
     const T& nonRealtimeAcquire()
     {
         nonRealtimeLock.lock();
-        auto current = control.load(std::memory_order_acquire);
+        size_t current = control.load(std::memory_order_acquire);
 
         // there is new data so flip the indices around atomically ensuring we are not inside realtimeAssign
         if ((current & NEWDATA_BIT) != 0)
         {
-            int newValue;
+            size_t newValue;
 
             do
             {
@@ -250,24 +250,24 @@ private:
         : data ({T (std::forward (args)...), T (std::forward (args)...)}), realtimeCopy (std::forward (args)...)
     {}
 
-    enum
+    enum : size_t
     {
-        INDEX_BIT = (1 << 0),
-        BUSY_BIT = (1 << 1),
-        NEWDATA_BIT = (1 << 2)
+        INDEX_BIT = (1U << 0),
+        BUSY_BIT = (1U << 1),
+        NEWDATA_BIT = (1U << 2)
     };
 
-    int acquireIndex() noexcept
+    size_t acquireIndex() noexcept
     {
         return control.fetch_or (BUSY_BIT, std::memory_order_acquire) & INDEX_BIT;
     }
 
-    void releaseIndex(int idx) noexcept
+    void releaseIndex(size_t idx) noexcept
     {
         control.store ((idx & INDEX_BIT) | NEWDATA_BIT, std::memory_order_release);
     }
 
-    std::atomic<int> control = {0};
+    std::atomic<size_t> control = {0};
 
     std::array<T, 2> data;
     T realtimeCopy;
