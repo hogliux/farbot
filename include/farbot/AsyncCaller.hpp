@@ -39,7 +39,7 @@ public:
     /** Process all the lambdas that have been deferred with callAsync
      * 
      *  Call this from your non-realtime thread to process lambdas. Note that
-     *  you must periodically execute this function as the non-realtime thread
+     *  you must periodically execute this function as the realtime thread
      *  will not signal for you to wake up.
      * 
      *  NOTE: process may only be called from a single thread.
