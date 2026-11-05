@@ -160,7 +160,7 @@ public:
         assert ((control.load() & BUSY_BIT) == 0); // <- never delete this object while the realtime thread is still using it
 
         // Spin!
-        while ((control.load() & BUSY_BIT) == 1);
+        while ((control.load() & BUSY_BIT) != 0);
 
         auto accquired = nonRealtimeLock.try_lock();
 
